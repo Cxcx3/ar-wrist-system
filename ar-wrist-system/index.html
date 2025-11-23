@@ -7,6 +7,7 @@
   <style>
     body { margin: 0; overflow: hidden; background: black; }
     canvas { display: block; }
+    #message { position: absolute; top: 10px; left: 10px; color: white; z-index: 1000; }
   </style>
 
   <!-- A-Frame -->
@@ -16,12 +17,13 @@
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: true;">
+  <div id="message">Initializing camera...</div>
+
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: true;" vr-mode-ui="enabled: false">
     
     <!-- Marker -->
     <a-marker type="pattern" url="wrist-marker.patt">
-      
-      <!-- 3D Watch model -->
+      <!-- Watch model -->
       <a-entity 
         gltf-model="watch.glb"
         scale="0.5 0.5 0.5"
@@ -30,13 +32,25 @@
         animation-mixer>
       </a-entity>
 
-      <!-- Red box fallback (for testing) -->
+      <!-- Red box fallback -->
       <a-box position="0 0.5 0" material="color: red;"></a-box>
-
     </a-marker>
 
     <!-- Camera -->
     <a-entity camera></a-entity>
   </a-scene>
+
+  <script>
+    // Check camera permission
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        document.getElementById('message').innerText = 'Camera ready. Point at the marker!';
+        // Stop the stream, A-Frame will handle it
+        stream.getTracks().forEach(track => track.stop());
+      })
+      .catch(err => {
+        document.getElementById('message').innerText = 'Camera access denied. Go to Settings → Safari → Camera → Allow.';
+      });
+  </script>
 </body>
 </html>
